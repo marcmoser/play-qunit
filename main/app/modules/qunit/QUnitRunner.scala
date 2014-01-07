@@ -25,7 +25,7 @@ class QUnitRunner extends PlaySpecification {
     examplesBlock {
       jsFiles.toList.foreach(f => {
         val testname = f.getName().replace(".js", "")
-        "Pass QUnit Tests " + testname in new WithBrowser(webDriver = classOf[PhantomJSDriver]) {
+        "Pass QUnit Tests " + testname in new WithBrowser(webDriver = FIREFOX /*classOf[PhantomJSDriver]*/) {
           browser.goTo("/qunit/" + testname)
           try {
             Thread.sleep(500L)
