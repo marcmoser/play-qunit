@@ -1,11 +1,12 @@
 /**
  * sinon-qunit 1.0.0, 2010/12/09
  *
- * @author Christian Johansen (christian@cjohansen.no)
+ * @author Gustavo Machado (@machadogj), Jose Romaniello (@jfroma)
+ * Modified version of sinon-qunit from Christian Johansen
  *
  * (The BSD License)
  * 
- * Copyright (c) 2010-2011, Christian Johansen, christian@cjohansen.no
+ * Copyright (c) 2010-2011
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification,
@@ -44,19 +45,30 @@ sinon.config = {
     injectIntoThis: true,
     injectInto: null,
     properties: ["spy", "stub", "mock", "clock", "sandbox"],
-    useFakeTimers: true,
+    useFakeTimers: false,
     useFakeServer: false
 };
 
 (function (global) {
-    var qTest = QUnit.test;
+    var qModule = QUnit.module;
     
-    QUnit.test = global.test = function (testName, expected, callback, async) {
-        if (arguments.length === 2) {
-            callback = expected;
-            expected = null;
-        }
+    var setup = function () {
+        $.extend(this, sinon.sandbox.create(sinon.config));
+    };
 
-        return qTest(testName, expected, sinon.test(callback), async);
+    var teardown = function () { this.verifyAndRestore(); };
+                                                  
+    QUnit.module = global.module = function (name, lifecycle) {
+        lifecycle = lifecycle || {};
+        var newlc = {};
+        newlc.setup = function(){
+            setup.bind(this)();
+            lifecycle.setup && lifecycle.setup.bind(this)();
+        };
+        newlc.teardown = function(){
+            teardown.bind(this)();
+            lifecycle.teardown && lifecycle.teardown.bind(this)();
+        };         
+        qModule(name, newlc);          
     };
 }(this));
